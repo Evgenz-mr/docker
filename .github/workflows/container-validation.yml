@@ -1,0 +1,21 @@
+name: container-validation
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build rootless example
+        run: docker build -t container-lab:test examples/nginx-rootless
+      - name: Verify image user is non-root
+        run: |
+          user=$(docker image inspect container-lab:test --format '{{.Config.User}}')
+          test -n "$user"
+          test "$user" != "0"
